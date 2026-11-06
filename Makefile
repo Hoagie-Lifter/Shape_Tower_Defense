@@ -1,3 +1,5 @@
+.SILENT:
+
 # per-project
 SFML = E:/libraries/SFML-3.1.0
 DLLS = libs/sfml
@@ -22,7 +24,7 @@ build:
 	mkdir build
 
 run: main
-	copy $(subst /,\,$(DLLS))\*.dll .
+	copy $(subst /,\,$(DLLS))\*.dll . > nul 2>&1
 	main.exe
 	-del $(notdir $(wildcard $(DLLS)/*.dll))
 

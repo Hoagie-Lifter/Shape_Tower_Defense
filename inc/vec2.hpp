@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <math.h>
+#include <cmath>
 
 template <typename T>
 class Vec2
@@ -78,12 +78,32 @@ public:
 	
 	bool operator == (const Vec2 & rhs) const
 	{
+		// only true if x AND y are equal to rhs
 		return (x == rhs.x && y == rhs.y);
 	}
 	
 	bool operator != (const Vec2 & rhs) const
 	{
-		return (x != rhs.x && y != rhs.y);;
+		// only true if x OR y are not equal to rhs
+		return (x != rhs.x || y != rhs.y);
+	}
+	
+	float length() const
+	{
+		// pythagorean theorem 
+		return std::sqrt(x * x + y * y);
+	}
+	
+	float distance(const Vec2 & rhs) const
+	{
+		return Vec2(rhs.x - x, rhs.y - y).length();
+	}
+	
+	void normalize()
+	{
+		float l = length();
+		x /= l;
+		y /= l;
 	}
 	
 };
