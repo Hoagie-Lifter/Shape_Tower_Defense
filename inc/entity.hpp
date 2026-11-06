@@ -25,9 +25,7 @@ class Entity
 	std::string		m_tag = "default";
 	
 	Entity(const size_t & id, const std::string & tag)
-		: m_tag(tag)
-		, m_id(id)
-	{}
+		: m_tag(tag), m_id(id) {}
 	
 public:
 	bool isActive() const
