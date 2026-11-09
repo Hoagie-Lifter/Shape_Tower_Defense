@@ -3,6 +3,7 @@
 #include "components.hpp"
 #include <string>
 #include <tuple>
+#include <utility>
 
 class EntityManager;
 
@@ -45,11 +46,28 @@ public:
 	
 	const std::string & tag() const
 	{
-		return m_tag
+		return m_tag;
 	}
 	
+	template <typename T, typename... TArgs>
+	T & add(TArgs &&... mArgs)
+	{
+		auto & component = std::get<T>(m_components);
+		component = T(std::forward<TArgs>(mArgs)...);
+		component.exists = true;
+		return component;
+	}
 	
-	
-	
+	template <typename T>
+	T & get()
+	{
+		return std::get<T>(m_components);
+	}
+
+	template <typename T>
+	bool has() const
+	{
+		return std::get<T>(m_components).exists;
+	}
 };
 	
