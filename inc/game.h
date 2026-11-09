@@ -4,9 +4,10 @@
 #include "entity_manager.hpp"
 #include <SFML/Graphics.hpp>
 
-struct BulletConfig {int shapeRadius}
-struct EnemyConfig  {}
-struct PlayerConfig {}
+struct WindowConfig {int FR, FS, BR, BG, BB; unsigned int W, H;};
+struct BulletConfig {int SR, CR, OT, V, L, FR, FG, FB, OR, OG, OB; float S;};
+struct EnemyConfig  {int SR, CR, OT, L, SI, VMIN, VMAX, OR, OG, OB; float SMIN, SMAX;};
+struct PlayerConfig {int SR, CR, OT, V, FR, FG, FB, OR, OG, OB; float S;};
 
 class Game
 {
@@ -20,6 +21,7 @@ class Game
 	sf::Text				m_text;
 	sf::RenderWindow		m_window;
 	
+	WindowConfig    		m_windowConfig;
 	BulletConfig            m_bulletConfig;
 	EnemyConfig             m_enemyConfig;
 	EntityManager           m_entities;
@@ -28,6 +30,7 @@ class Game
 	std::shared_ptr<Entity> player();
 	
 	void init(const std::string & config);
+	void readConfigFile(const std::string & config);
 	void setPaused(bool paused);
 	
 	void sCollision();
@@ -44,6 +47,6 @@ class Game
 	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 	
 public:	
-	Game(const std:string & config);
+	Game(const std::string & config);
 	void run();
 };
