@@ -3,7 +3,7 @@
 #include "entity.hpp"
 #include <map>
 
-using EntityVec = std::vector<std::shared-ptr<Entity>>;
+using EntityVec = std::vector<std::shared_ptr<Entity>>;
 using EntityMap = std::map<std::string, EntityVec>;
 
 class EntityManager
@@ -46,7 +46,7 @@ public:
 	
 	std::shared_ptr<Entity> addEntity(const std::string & tag)
 	{
-		auto entity = std::shared_ptr<Entity>(new Entity(m_totalEntities++, tag))
+		auto entity = std::shared_ptr<Entity>(new Entity(m_totalEntities++, tag));
 		m_entitiesToAdd.push_back(entity);
 		return entity;
 	}
