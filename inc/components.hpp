@@ -74,7 +74,7 @@ public:
 class CTransform : public Component
 {
 public:
-	// agle corresponds to rotation
+	// angle corresponds to rotation
 	float angle		= 0;
 	Vec2f pos		= {0.0, 0.0};
 	Vec2f velocity  = {0.0, 0.0};
