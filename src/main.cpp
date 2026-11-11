@@ -4,7 +4,7 @@
 
 int main()
 {
-	Game g("config/config.txt");
+	Game g("bin/config/config.txt");
 	g.run();
 	
 	return 0;
