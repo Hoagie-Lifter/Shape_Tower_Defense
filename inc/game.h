@@ -31,7 +31,7 @@ class Game
 	
 	void init(const std::string & config);
 	void readConfigFile(const std::string & config);
-	void setPaused(bool paused);
+	void setPaused(bool & paused);
 	
 	void sCollision();
 	void sEnemySpawner();
@@ -41,7 +41,7 @@ class Game
 	void sUserInput();
 	
 	void spawnBullet(std::shared_ptr<Entity> entity, const Vec2f & target);
-	void spawnEnemy(std::shared_ptr<Entity> entity, const Vec2f & mousePos);
+	void spawnEnemy();
 	void spawnPlayer();
 	void spawnSmallEnemies(std::shared_ptr<Entity> entity);
 	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);

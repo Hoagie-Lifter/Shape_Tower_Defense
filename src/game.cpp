@@ -32,25 +32,27 @@ void Game::run()
 	{
 		m_entities.update();
 		
+		if (!m_paused)
+		{
+			sEnemySpawner();
+			sMovement();
+			sCollision();
+			sLifespan();
+			m_currentFrame++;
+		}
+
 		sUserInput();
-		sEnemySpawner();
-		sMovement();
-		sCollision();
 		sRender();
-		
-		m_currentFrame++;
 	}
 }
 
-void Game::setPaused(bool paused)
+void Game::setPaused(bool & paused)
 {
-	// TODO
+	paused = !paused;
 }
 
 void Game::spawnPlayer()
 {
-	// TODO: finish adding all player values
-	
 	auto e = m_entities.addEntity("player");
 	
 	e -> add<CInput>();
@@ -64,13 +66,19 @@ void Game::spawnPlayer()
 	e -> add<CTransform>(Vec2f(200, 200), Vec2f(m_playerConfig.S, m_playerConfig.S), 0);
 }
 
-void Game::spawnEnemy(std::shared_ptr<Entity> entity, const Vec2f & mousePos)
+void Game::spawnEnemy()
 {
-	//TODO
 	auto e = m_entities.addEntity("enemy");
 	
-	e -> add<CShape>(m_enemyConfig.SR, m_enemyConfig.VMAX, sf::Color(0, 0, 255), sf::Color(m_enemyConfig.OR, m_enemyConfig.OG, m_enemyConfig.OB), m_enemyConfig.OT);
+	e -> add<CShape>(
+	m_enemyConfig.SR,
+	m_enemyConfig.VMAX,
+	sf::Color(0, 0, 255),
+	sf::Color(m_enemyConfig.OR, m_enemyConfig.OG, m_enemyConfig.OB),
+	m_enemyConfig.OT);
+	
 	e -> add<CTransform>(Vec2f(200, 200), Vec2f(m_enemyConfig.SMIN, m_enemyConfig.SMIN), 0);
+	e -> add<CLifespan>(100);
 	
 	m_lastEnemySpawnTime = m_currentFrame;
 }
@@ -108,20 +116,34 @@ void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
 	// TODO
 }
 
-void Game::sMovement()
+void Game::sLifespan()
 {
-	// Sample for player entity:
 	for (auto e : m_entities.getEntities())
 	{
-		auto & transform = e -> get<CTransform>();
-		transform.pos.x += transform.velocity.x;
-		transform.pos.y += transform.velocity.y;
+		if (e -> has<CLifespan>())
+		{
+			if (e -> get<CLifespan>().remaining > 0)
+			{
+				// SCALE ALPHA CHANNEL 
+				// if e has 100 total / 25 remaining, alpha set to (float) remaining / total * 255 
+				
+				e -> get<CLifespan>().remaining--;
+			}
+			
+			if (e -> get<CLifespan>().remaining <= 0)
+			{
+				e -> destroy();
+			}
+		}
 	}
 }
 
-void Game::sLifespan()
+void Game::sEnemySpawner()
 {
-	// TODO:
+	if (m_currentFrame >= m_lastEnemySpawnTime + m_enemyConfig.SI)
+	{
+		spawnEnemy();
+	}
 }
 
 void Game::sCollision()
@@ -132,7 +154,7 @@ void Game::sCollision()
 	{
 		for (auto e : m_entities.getEntities("enemy"))
 		{
-			
+			spawnSmallEnemies(e);
 		}
 		
 		for (auto e : m_entities.getEntities("small_enemy"))
@@ -142,9 +164,38 @@ void Game::sCollision()
 	}
 }
 
-void Game::sEnemySpawner()
-{
-	//TODO
+void Game::sMovement()
+{	
+	// allow for multiple things to affect player movement, not just user input
+	// would allow for easily adding wind to player (if windy == true) {inputVelocity += 5} etc 
+	Vec2f inputVelocity(0, 0);
+	
+	if (player() -> get<CInput>().up == true)
+	{
+		inputVelocity.y -= 5;
+	}
+	
+	if (player() -> get<CInput>().down == true)
+	{
+		inputVelocity.y += 5;
+	}
+	
+	if (player() -> get<CInput>().left == true)
+	{
+		inputVelocity.x -= 5;
+	}
+	
+	if (player() -> get<CInput>().right == true)
+	{
+		inputVelocity.x += 5;
+	}
+	
+	player() -> get<CTransform>().velocity = inputVelocity;
+	
+	for (auto e : m_entities.getEntities())
+	{
+		e -> get<CTransform>().pos += e -> get<CTransform>().velocity;
+	}
 }
 
 void Game::sRender()
@@ -179,25 +230,81 @@ void Game::sUserInput()
 		
 		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
 		{
-			std::cout << "Key pressed = " << int(keyPressed -> scancode) << "\n";
-			
 			if (keyPressed -> scancode == sf::Keyboard::Scancode::W)
 			{
-				// set input component UP to true
-				
-				std::cout << "W key pressed\n";
+				player() -> get<CInput>().up = true;
+			}
+		}
+		
+		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
+		{
+			if (keyPressed -> scancode == sf::Keyboard::Scancode::S)
+			{
+				player() -> get<CInput>().down = true;
+			}
+		}
+		
+		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
+		{
+			if (keyPressed -> scancode == sf::Keyboard::Scancode::A)
+			{
+				player() -> get<CInput>().left = true;
+			}
+		}
+		
+		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
+		{
+			if (keyPressed -> scancode == sf::Keyboard::Scancode::D)
+			{
+				player() -> get<CInput>().right = true;
+			}
+		}
+		
+		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
+		{
+			if (keyPressed -> scancode == sf::Keyboard::Scancode::Escape)
+			{
+				std::exit(0);
+			}
+		}
+		
+		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
+		{
+			if (keyPressed -> scancode == sf::Keyboard::Scancode::P)
+			{
+				setPaused(m_paused);
 			}
 		}
 		
 		if (const auto * keyPressed = event -> getIf<sf::Event::KeyReleased>())
 		{
-			std::cout << "Key pressed = " << int(keyPressed -> scancode) << "\n";
-			
 			if (keyPressed -> scancode == sf::Keyboard::Scancode::W)
 			{
-				// set input component UP to false
-				
-				std::cout << "W key released\n";
+				player() -> get<CInput>().up = false;
+			}
+		}
+		
+		if (const auto * keyPressed = event -> getIf<sf::Event::KeyReleased>())
+		{
+			if (keyPressed -> scancode == sf::Keyboard::Scancode::S)
+			{
+				player() -> get<CInput>().down = false;
+			}
+		}
+		
+		if (const auto * keyPressed = event -> getIf<sf::Event::KeyReleased>())
+		{
+			if (keyPressed -> scancode == sf::Keyboard::Scancode::A)
+			{
+				player() -> get<CInput>().left = false;
+			}
+		}
+		
+		if (const auto * keyPressed = event -> getIf<sf::Event::KeyReleased>())
+		{
+			if (keyPressed -> scancode == sf::Keyboard::Scancode::D)
+			{
+				player() -> get<CInput>().right = false;
 			}
 		}
 		
