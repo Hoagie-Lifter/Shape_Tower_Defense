@@ -205,9 +205,17 @@ void Game::sCollision()
 	
 	for (auto b : m_entities.getEntities("bullet"))
 	{
+		Vec2f bulletPos = b ->get<CTransform>().pos;
+		
 		for (auto e : m_entities.getEntities("enemy"))
 		{
-			spawnSmallEnemies(e);
+			Vec2f entityPos = e ->get<CTransform>().pos;
+			
+			if (bulletPos.distance(entityPos) <= m_bulletConfig.SR + m_enemyConfig.SR)
+			{
+				b -> destroy();
+				e -> destroy();
+			}
 		}
 		
 		for (auto e : m_entities.getEntities("small_enemy"))
