@@ -8,6 +8,7 @@ struct WindowConfig {int FR, FS, BR, BG, BB; unsigned int W, H;};
 struct BulletConfig {int SR, CR, OT, V, L, FR, FG, FB, OR, OG, OB; float S;};
 struct EnemyConfig  {int SR, CR, OT, L, SI, VMIN, VMAX, OR, OG, OB; float SMIN, SMAX;};
 struct TowerConfig  {int SR, CR, OT, V, FR, FG, FB, OR, OG, OB;};
+struct WallConfig   {int OT, FR, FG, FB, OR, OG, OB; float W, H;};
 
 class Game
 {
@@ -26,6 +27,7 @@ class Game
 	EnemyConfig             m_enemyConfig;
 	EntityManager           m_entities;
 	TowerConfig				m_towerConfig;
+	WallConfig				m_wallConfig;
 	
 	std::shared_ptr<Entity> tower();
 	
@@ -42,10 +44,11 @@ class Game
 	
 	void spawnBullet(std::shared_ptr<Entity> entity, const Vec2f & target);
 	void spawnEnemy();
-	void spawnTower(const Vec2f & mousePos);
-	void spawnTower();
 	void spawnSmallEnemies(std::shared_ptr<Entity> entity);
 	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
+	void spawnTower(const Vec2f & mousePos);
+	void spawnTower();
+	void spawnWalls();
 	
 public:	
 	Game(const std::string & config);

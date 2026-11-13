@@ -12,11 +12,11 @@ void Game::init(const std::string & config)
 {
 	readConfigFile(config);
 	
-	m_window.create(sf::VideoMode({m_windowConfig.W, m_windowConfig.H}), "Assignment 2");
+	m_window.create(sf::VideoMode({m_windowConfig.W, m_windowConfig.H}), "Assignment 2",  sf::State::Fullscreen);
 	m_window.setKeyRepeatEnabled(false);
 	m_window.setFramerateLimit(60);
 	
-	//spawnWalls();
+	spawnWalls();
 	spawnTower();
 }
 
@@ -52,7 +52,30 @@ void Game::setPaused(bool & paused)
 	paused = !paused;
 }
 
-//spawnWalls()
+void Game::spawnWalls()
+{
+	auto e1 = m_entities.addEntity("wall");
+	
+	e1 -> add<CRectangle>(
+	sf::Color(m_wallConfig.FR, m_wallConfig.FG, m_wallConfig.FB),
+	sf::Color(m_wallConfig.OR, m_wallConfig.OG, m_wallConfig.OB),
+	m_wallConfig.W,
+	m_wallConfig.H,
+	m_wallConfig.OT);
+	
+	e1 -> add<CTransform>(Vec2f{m_windowConfig.W / 2, -50});
+	
+	auto e2 = m_entities.addEntity("wall");
+	
+	e2 -> add<CRectangle>(
+	sf::Color(m_wallConfig.FR, m_wallConfig.FG, m_wallConfig.FB),
+	sf::Color(m_wallConfig.OR, m_wallConfig.OG, m_wallConfig.OB),
+	m_wallConfig.W,
+	m_wallConfig.H,
+	m_wallConfig.OT);
+	
+	e2 -> add<CTransform>(Vec2f{m_windowConfig.W / 2, m_windowConfig.H});
+}
 
 void Game::spawnTower(const Vec2f & mousePos)
 {
@@ -205,10 +228,12 @@ void Game::sRender()
 	for (auto e : m_entities.getEntities())
 	{
 		e -> get<CCircle>().circle.setPosition(e -> get<CTransform>().pos);
+		e -> get<CRectangle>().rectangle.setPosition(e -> get<CTransform>().pos);
 		e -> get<CTransform>().angle += 1.0f;
 		e -> get<CCircle>().circle.setRotation(sf::degrees(e -> get<CTransform>().angle));
 	
 		m_window.draw(e -> get<CCircle>().circle);
+		m_window.draw(e -> get<CRectangle>().rectangle);
 	}
 	
 	m_window.display();
@@ -275,7 +300,7 @@ void Game::readConfigFile(const std::string & config)
 			fin >> m_windowConfig.H;
 		}
 		
-		else if (token == "Bullet:")
+		if (token == "Bullet:")
 		{
 			// BulletConfig {int SR, CR, OT, V, FR, FG, FB, OR, OG, OB; float S;};
 			
@@ -293,7 +318,7 @@ void Game::readConfigFile(const std::string & config)
 			fin >> m_bulletConfig.S;
 		}
 		
-		else if (token == "Enemy:")
+		if (token == "Enemy:")
 		{
 			// EnemyConfig  {int SR, CR, OT, L, SI, VMIN, VMAX, OR, OG, OB; float SMIN, SMAX;};
 			
@@ -311,7 +336,7 @@ void Game::readConfigFile(const std::string & config)
 			fin >> m_enemyConfig.SMAX;
 		}
 		
-		else if (token == "Tower:")
+		if (token == "Tower:")
 		{
 			// TowerConfig {int SR, CR, OT, V, FR, FG, FB, OR, OG, OB;};
 			
@@ -325,6 +350,21 @@ void Game::readConfigFile(const std::string & config)
 			fin >> m_towerConfig.OR;
 			fin >> m_towerConfig.OG;
 			fin >> m_towerConfig.OB;
+		}
+		
+		if (token == "Wall:")
+		{
+			// WallConfig {int SR, CR, OT, V, FR, FG, FB, OR, OG, OB;};
+			
+			fin >> m_wallConfig.W;
+			fin >> m_wallConfig.H;
+			fin >> m_wallConfig.OT;
+			fin >> m_wallConfig.FR;
+			fin >> m_wallConfig.FG;
+			fin >> m_wallConfig.FB;
+			fin >> m_wallConfig.OR;
+			fin >> m_wallConfig.OG;
+			fin >> m_wallConfig.OB;
 		}
 	}
 }
