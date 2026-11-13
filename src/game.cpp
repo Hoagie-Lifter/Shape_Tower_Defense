@@ -16,12 +16,13 @@ void Game::init(const std::string & config)
 	m_window.setKeyRepeatEnabled(false);
 	m_window.setFramerateLimit(60);
 	
-	spawnPlayer();
+	//spawnWalls();
+	spawnTower();
 }
 
-std::shared_ptr<Entity> Game::player()
+std::shared_ptr<Entity> Game::tower()
 {
-	return m_entities.getEntities("player").back();
+	return m_entities.getEntities("tower").back();
 }
 
 void Game::run()
@@ -51,26 +52,43 @@ void Game::setPaused(bool & paused)
 	paused = !paused;
 }
 
-void Game::spawnPlayer()
+//spawnWalls()
+
+void Game::spawnTower(const Vec2f & mousePos)
 {
-	auto e = m_entities.addEntity("player");
+	auto e = m_entities.addEntity("tower");
 	
 	e -> add<CInput>();
-	e -> add<CShape>(
-	m_playerConfig.SR,
-	m_playerConfig.V,
-	sf::Color(m_playerConfig.FR, m_playerConfig.FG, m_playerConfig.FB),
-	sf::Color(m_playerConfig.OR, m_playerConfig.OG, m_playerConfig.OB),
-	m_playerConfig.OT);
+	e -> add<CCircle>(
+	m_towerConfig.SR,
+	m_towerConfig.V,
+	sf::Color(m_towerConfig.FR, m_towerConfig.FG, m_towerConfig.FB),
+	sf::Color(m_towerConfig.OR, m_towerConfig.OG, m_towerConfig.OB),
+	m_towerConfig.OT);
 	
-	e -> add<CTransform>(Vec2f(200, 200), Vec2f(m_playerConfig.S, m_playerConfig.S), 0);
+	e -> add<CTransform>(Vec2f(mousePos.x, mousePos.y));
+}
+
+void Game::spawnTower()
+{
+	auto e = m_entities.addEntity("tower");
+	
+	e -> add<CInput>();
+	e -> add<CCircle>(
+	m_towerConfig.SR,
+	m_towerConfig.V,
+	sf::Color(m_towerConfig.FR, m_towerConfig.FG, m_towerConfig.FB),
+	sf::Color(m_towerConfig.OR, m_towerConfig.OG, m_towerConfig.OB),
+	m_towerConfig.OT);
+	
+	e -> add<CTransform>(Vec2f(200, 200));
 }
 
 void Game::spawnEnemy()
 {
 	auto e = m_entities.addEntity("enemy");
 	
-	e -> add<CShape>(
+	e -> add<CCircle>(
 	m_enemyConfig.SR,
 	m_enemyConfig.VMAX,
 	sf::Color(0, 0, 255),
@@ -101,7 +119,7 @@ void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2f & target)
 	direction.normalize();
 	Vec2f velocity = direction * m_bulletConfig.S;
 	
-	e -> add<CShape>(
+	e -> add<CCircle>(
 	m_bulletConfig.SR, 
 	m_bulletConfig.V,
 	sf::Color(m_bulletConfig.FR, m_bulletConfig.FG, m_bulletConfig.FB),
@@ -166,31 +184,8 @@ void Game::sCollision()
 
 void Game::sMovement()
 {	
-	// allow for multiple things to affect player movement, not just user input
-	// would allow for easily adding wind to player (if windy == true) {inputVelocity += 5} etc 
-	Vec2f inputVelocity(0, 0);
-	
-	if (player() -> get<CInput>().up == true)
-	{
-		inputVelocity.y -= 5;
-	}
-	
-	if (player() -> get<CInput>().down == true)
-	{
-		inputVelocity.y += 5;
-	}
-	
-	if (player() -> get<CInput>().left == true)
-	{
-		inputVelocity.x -= 5;
-	}
-	
-	if (player() -> get<CInput>().right == true)
-	{
-		inputVelocity.x += 5;
-	}
-	
-	player() -> get<CTransform>().velocity = inputVelocity;
+	// allow for multiple things to affect tower movement, not just user input
+	// would allow for easily adding wind to tower (if windy == true) {inputVelocity += 5} etc 
 	
 	for (auto e : m_entities.getEntities())
 	{
@@ -209,11 +204,11 @@ void Game::sRender()
 	
 	for (auto e : m_entities.getEntities())
 	{
-		e -> get<CShape>().circle.setPosition(e -> get<CTransform>().pos);
+		e -> get<CCircle>().circle.setPosition(e -> get<CTransform>().pos);
 		e -> get<CTransform>().angle += 1.0f;
-		e -> get<CShape>().circle.setRotation(sf::degrees(e -> get<CTransform>().angle));
+		e -> get<CCircle>().circle.setRotation(sf::degrees(e -> get<CTransform>().angle));
 	
-		m_window.draw(e -> get<CShape>().circle);
+		m_window.draw(e -> get<CCircle>().circle);
 	}
 	
 	m_window.display();
@@ -226,38 +221,6 @@ void Game::sUserInput()
 		if (event -> is<sf::Event::Closed>())
 		{
 			std::exit(0);
-		}
-		
-		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
-		{
-			if (keyPressed -> scancode == sf::Keyboard::Scancode::W)
-			{
-				player() -> get<CInput>().up = true;
-			}
-		}
-		
-		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
-		{
-			if (keyPressed -> scancode == sf::Keyboard::Scancode::S)
-			{
-				player() -> get<CInput>().down = true;
-			}
-		}
-		
-		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
-		{
-			if (keyPressed -> scancode == sf::Keyboard::Scancode::A)
-			{
-				player() -> get<CInput>().left = true;
-			}
-		}
-		
-		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
-		{
-			if (keyPressed -> scancode == sf::Keyboard::Scancode::D)
-			{
-				player() -> get<CInput>().right = true;
-			}
 		}
 		
 		if (const auto * keyPressed = event -> getIf<sf::Event::KeyPressed>())
@@ -276,54 +239,18 @@ void Game::sUserInput()
 			}
 		}
 		
-		if (const auto * keyPressed = event -> getIf<sf::Event::KeyReleased>())
-		{
-			if (keyPressed -> scancode == sf::Keyboard::Scancode::W)
-			{
-				player() -> get<CInput>().up = false;
-			}
-		}
-		
-		if (const auto * keyPressed = event -> getIf<sf::Event::KeyReleased>())
-		{
-			if (keyPressed -> scancode == sf::Keyboard::Scancode::S)
-			{
-				player() -> get<CInput>().down = false;
-			}
-		}
-		
-		if (const auto * keyPressed = event -> getIf<sf::Event::KeyReleased>())
-		{
-			if (keyPressed -> scancode == sf::Keyboard::Scancode::A)
-			{
-				player() -> get<CInput>().left = false;
-			}
-		}
-		
-		if (const auto * keyPressed = event -> getIf<sf::Event::KeyReleased>())
-		{
-			if (keyPressed -> scancode == sf::Keyboard::Scancode::D)
-			{
-				player() -> get<CInput>().right = false;
-			}
-		}
-		
 		if (const auto * mousePressed = event -> getIf<sf::Event::MouseButtonPressed>())
 		{
 			Vec2f mousePos(mousePressed -> position);
 			
 			if (mousePressed -> button == sf::Mouse::Button::Left)
 			{
-				spawnBullet(player(), mousePos);
-				
-				std::cout << "Left mouse (" << mousePos.x << ", " << mousePos.y << ")\n";
+				spawnTower(mousePos);
 			}
 			
 			if (mousePressed -> button == sf::Mouse::Button::Right)
 			{
-				// call spawnBullet() here
 				
-				std::cout << "Right mouse (" << mousePos.x << ", " << mousePos.y << ")\n";
 			}
 		}
 	}
@@ -384,21 +311,20 @@ void Game::readConfigFile(const std::string & config)
 			fin >> m_enemyConfig.SMAX;
 		}
 		
-		else if (token == "Player:")
+		else if (token == "Tower:")
 		{
-			// PlayerConfig {int SR, CR, OT, V, FR, FG, FB, OR, OG, OB; float S;};
+			// TowerConfig {int SR, CR, OT, V, FR, FG, FB, OR, OG, OB;};
 			
-			fin >> m_playerConfig.SR;
-			fin >> m_playerConfig.CR;
-			fin >> m_playerConfig.OT;
-			fin >> m_playerConfig.V;
-			fin >> m_playerConfig.FR;
-			fin >> m_playerConfig.FG;
-			fin >> m_playerConfig.FB;
-			fin >> m_playerConfig.OR;
-			fin >> m_playerConfig.OG;
-			fin >> m_playerConfig.OB;
-			fin >> m_playerConfig.S;
+			fin >> m_towerConfig.SR;
+			fin >> m_towerConfig.CR;
+			fin >> m_towerConfig.OT;
+			fin >> m_towerConfig.V;
+			fin >> m_towerConfig.FR;
+			fin >> m_towerConfig.FG;
+			fin >> m_towerConfig.FB;
+			fin >> m_towerConfig.OR;
+			fin >> m_towerConfig.OG;
+			fin >> m_towerConfig.OB;
 		}
 	}
 }
