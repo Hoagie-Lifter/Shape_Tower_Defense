@@ -39,6 +39,7 @@ void Game::run()
 			sMovement();
 			sCollision();
 			sLifespan();
+			shootBullet();
 			m_currentFrame++;
 		}
 
@@ -74,7 +75,7 @@ void Game::spawnWalls()
 	m_wallConfig.H,
 	m_wallConfig.OT);
 	
-	e2 -> add<CTransform>(Vec2f{m_windowConfig.W / 2, m_windowConfig.H});
+	e2 -> add<CTransform>(Vec2f{m_windowConfig.W / 2, m_windowConfig.H + 50});
 }
 
 void Game::spawnTower(const Vec2f & mousePos)
@@ -118,8 +119,8 @@ void Game::spawnEnemy()
 	sf::Color(m_enemyConfig.OR, m_enemyConfig.OG, m_enemyConfig.OB),
 	m_enemyConfig.OT);
 	
-	e -> add<CTransform>(Vec2f(200, 200), Vec2f(m_enemyConfig.SMIN, m_enemyConfig.SMIN), 0);
-	e -> add<CLifespan>(100);
+	e -> add<CTransform>(Vec2f(-100, m_windowConfig.H / 2), Vec2f(2, 0), 0);
+	e -> add<CLifespan>(1000);
 	
 	m_lastEnemySpawnTime = m_currentFrame;
 }
@@ -127,6 +128,17 @@ void Game::spawnEnemy()
 void Game::spawnSmallEnemies(std::shared_ptr<Entity> entity)
 {
 	//TODO
+}
+
+void Game::shootBullet()
+{
+	for (auto e : m_entities.getEntities("tower"))
+	{
+		if (m_currentFrame % 50 == 0)
+		{
+			spawnBullet(e, Vec2f{100, 100});
+		}
+	}
 }
 
 void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2f & target)

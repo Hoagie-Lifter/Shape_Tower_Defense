@@ -42,6 +42,7 @@ class Game
 	void sRender();
 	void sUserInput();
 	
+	void shootBullet();
 	void spawnBullet(std::shared_ptr<Entity> entity, const Vec2f & target);
 	void spawnEnemy();
 	void spawnSmallEnemies(std::shared_ptr<Entity> entity);
