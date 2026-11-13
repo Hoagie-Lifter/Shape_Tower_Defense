@@ -8,11 +8,12 @@
 class EntityManager;
 
 using ComponentTuple = std::tuple<
+	CCircle,
 	CCollision,
 	CInput,
 	CLifespan,
+	CRectangle,
 	CScore,
-	CShape,
 	CTransform
 >;
 

@@ -12,6 +12,22 @@ public:
 	bool exists = false;
 };
 
+class CCircle : public Component
+{
+public:
+	sf::CircleShape circle;
+	
+	CCircle() = default;
+	CCircle(float radius, size_t points, const sf::Color & fill, const sf::Color & outline, float thickness)
+		: circle(radius, points)
+	{
+		circle.setFillColor(fill);
+		circle.setOutlineColor(outline);
+		circle.setOutlineThickness(thickness);
+		circle.setOrigin({radius, radius}); // sets origin to center of shape
+	}
+};
+
 class CCollision : public Component
 {
 public:
@@ -45,6 +61,22 @@ public:
 		: lifespan(totalLifespan), remaining(totalLifespan) {}
 };
 
+class CRectangle : public Component
+{
+public:
+	sf::RectangleShape rectangle;
+	
+	CRectangle() = default;
+	CRectangle(const sf::Color & fill, const sf::Color & outline, float width, float height, float thickness)
+		: rectangle({width, height})
+	{
+		rectangle.setFillColor(fill);
+		rectangle.setOutlineColor(outline);
+		rectangle.setOutlineThickness(thickness);
+		rectangle.setOrigin({width / 2, height / 2}); // sets origin to center of shape
+	}
+};
+
 class CScore : public Component
 {
 public:
@@ -53,22 +85,6 @@ public:
 	CScore() = default;
 	CScore(int s)
 		: score(s) {}
-};
-
-class CShape : public Component
-{
-public:
-	sf::CircleShape circle;
-	
-	CShape() = default;
-	CShape(float radius, size_t points, const sf::Color & fill, const sf::Color & outline, float thickness)
-		: circle(radius, points)
-	{
-		circle.setFillColor(fill);
-		circle.setOutlineColor(outline);
-		circle.setOutlineThickness(thickness);
-		circle.setOrigin({radius, radius}); // sets origin to center of shape
-	}
 };
 
 class CTransform : public Component
@@ -80,6 +96,8 @@ public:
 	Vec2f velocity  = {0.0, 0.0};
 	
 	CTransform() = default;
+	CTransform(const Vec2f & p)
+		: pos(p) {}
 	CTransform(const Vec2f & p, const Vec2f & v, float a)
 		: pos(p), velocity(v), angle(a) {}
 };
