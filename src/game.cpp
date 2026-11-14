@@ -105,8 +105,8 @@ void Game::spawnEnemy()
 	sf::Color(m_enemyConfig.OR, m_enemyConfig.OG, m_enemyConfig.OB),
 	m_enemyConfig.OT);
 	
-	e -> add<CTransform>(Vec2f(-100, m_windowConfig.H / 2), Vec2f(2, 0), 0);
-	e -> add<CLifespan>(1000);
+	e -> add<CTransform>(Vec2f(-100, m_windowConfig.H / 2), Vec2f(5, 0), 0);
+	e -> add<CLifespan>(1500);
 	
 	m_lastEnemySpawnTime = m_currentFrame;
 }
@@ -212,21 +212,25 @@ void Game::sCollision()
 		}
 	}
 	
-	//for (auto e : m_entities.getEntities("tower"))
+	//for (auto e : m_entities.getEntities("enemy"))
 	//{
-	//	Vec2f towerPos = e -> get<CTransform>().pos + m_towerConfig.SR;
-	//	
-	//	if (mousePos == towerPos)
+	//	Vec2f entityPos = e ->get<CTransform>().pos;
+	//		
+	//	if (entityPos.x <= m_windowConfig.W)
 	//	{
-	//		highlight(e);
+	//		e -> destroy();
+	//		std::cout << "Enemy made it to the end!\n";
+	//		//m_remainingHealth--;
 	//	}
 	//}
-}
+	
+	for (auto e : m_entities.getEntities("tower"))
+	{
+		Vec2f mousePos = sf::Mouse::getPosition(m_window);
+		Vec2f towerPos = e -> get<CTransform>().pos;
 
-void hightlight(std::shared_ptr<Entity> entity)
-{
-	//SHOW TOWER RANGE
-	// entity -> get<CTarget>().range;
+		e -> get<CTargeting>().displayed = (mousePos.distance(towerPos) <= m_towerConfig.SR);
+	}
 }
 
 void Game::sMovement()
@@ -249,17 +253,36 @@ void Game::sRender()
 	
 	m_window.clear();
 	
-	for (auto e : m_entities.getEntities())
+	for (auto e : m_entities.getEntities("wall"))
+	{
+		e -> get<CRectangle>().rectangle.setPosition(e -> get<CTransform>().pos);
+		m_window.draw(e -> get<CRectangle>().rectangle);
+	}
+	
+	for (auto e : m_entities.getEntities("tower"))
 	{
 		e -> get<CCircle>().circle.setPosition(e -> get<CTransform>().pos);
-		e -> get<CRectangle>().rectangle.setPosition(e -> get<CTransform>().pos);
-		e -> get<CTargeting>().range.setPosition(e -> get<CTransform>().pos);
+		m_window.draw(e -> get<CCircle>().circle);
+
+		if (e -> get<CTargeting>().displayed == true)
+		{
+			e -> get<CTargeting>().range.setPosition(e -> get<CTransform>().pos);
+			m_window.draw(e -> get<CTargeting>().range);				
+		}
+	}
+	
+	for (auto e : m_entities.getEntities("enemy"))
+	{
+		e -> get<CCircle>().circle.setPosition(e -> get<CTransform>().pos);
 		e -> get<CTransform>().angle += 1.0f;
 		e -> get<CCircle>().circle.setRotation(sf::degrees(e -> get<CTransform>().angle));
-	
 		m_window.draw(e -> get<CCircle>().circle);
-		m_window.draw(e -> get<CRectangle>().rectangle);
-		m_window.draw(e -> get<CTargeting>().range);
+	}
+	
+	for (auto e : m_entities.getEntities("bullet"))
+	{
+		e -> get<CCircle>().circle.setPosition(e -> get<CTransform>().pos);
+		m_window.draw(e -> get<CCircle>().circle);
 	}
 	
 	m_window.display();

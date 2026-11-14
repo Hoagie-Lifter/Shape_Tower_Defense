@@ -90,6 +90,8 @@ public:
 class CTargeting : public Component
 {
 public:
+	bool displayed = false;
+
 	sf::CircleShape range;
 	
 	CTargeting() = default;
