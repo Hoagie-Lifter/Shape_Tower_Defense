@@ -42,13 +42,13 @@ class Game
 	void sRender();
 	void sUserInput();
 	
+	void highlight(std::shared_ptr<Entity> entity);
 	void shootBullet();
 	void spawnBullet(std::shared_ptr<Entity> entity, const Vec2f & target);
 	void spawnEnemy();
 	void spawnSmallEnemies(std::shared_ptr<Entity> entity);
 	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 	void spawnTower(const Vec2f & mousePos);
-	void spawnTower();
 	void spawnWalls();
 	
 public:	

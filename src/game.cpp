@@ -17,7 +17,6 @@ void Game::init(const std::string & config)
 	m_window.setFramerateLimit(60);
 	
 	spawnWalls();
-	spawnTower();
 }
 
 std::shared_ptr<Entity> Game::tower()
@@ -91,21 +90,8 @@ void Game::spawnTower(const Vec2f & mousePos)
 	m_towerConfig.OT);
 	
 	e -> add<CTransform>(Vec2f(mousePos.x, mousePos.y));
-}
-
-void Game::spawnTower()
-{
-	auto e = m_entities.addEntity("tower");
 	
-	e -> add<CInput>();
-	e -> add<CCircle>(
-	m_towerConfig.SR,
-	m_towerConfig.V,
-	sf::Color(m_towerConfig.FR, m_towerConfig.FG, m_towerConfig.FB),
-	sf::Color(m_towerConfig.OR, m_towerConfig.OG, m_towerConfig.OB),
-	m_towerConfig.OT);
-	
-	e -> add<CTransform>(Vec2f(200, 200));
+	e -> add<CTargeting>(200, 1000, sf::Color(100, 100, 100, 50));
 }
 
 void Game::spawnEnemy()
@@ -132,6 +118,8 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> entity)
 
 void Game::shootBullet()
 {
+	// TODO: check if (e -> has<CTargeting>())
+	
 	for (auto e : m_entities.getEntities("tower"))
 	{
 		if (m_currentFrame % 50 == 0)
@@ -223,6 +211,22 @@ void Game::sCollision()
 			
 		}
 	}
+	
+	//for (auto e : m_entities.getEntities("tower"))
+	//{
+	//	Vec2f towerPos = e -> get<CTransform>().pos + m_towerConfig.SR;
+	//	
+	//	if (mousePos == towerPos)
+	//	{
+	//		highlight(e);
+	//	}
+	//}
+}
+
+void hightlight(std::shared_ptr<Entity> entity)
+{
+	//SHOW TOWER RANGE
+	// entity -> get<CTarget>().range;
 }
 
 void Game::sMovement()
@@ -249,11 +253,13 @@ void Game::sRender()
 	{
 		e -> get<CCircle>().circle.setPosition(e -> get<CTransform>().pos);
 		e -> get<CRectangle>().rectangle.setPosition(e -> get<CTransform>().pos);
+		e -> get<CTargeting>().range.setPosition(e -> get<CTransform>().pos);
 		e -> get<CTransform>().angle += 1.0f;
 		e -> get<CCircle>().circle.setRotation(sf::degrees(e -> get<CTransform>().angle));
 	
 		m_window.draw(e -> get<CCircle>().circle);
 		m_window.draw(e -> get<CRectangle>().rectangle);
+		m_window.draw(e -> get<CTargeting>().range);
 	}
 	
 	m_window.display();

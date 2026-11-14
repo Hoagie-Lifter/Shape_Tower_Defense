@@ -14,7 +14,8 @@ using ComponentTuple = std::tuple<
 	CLifespan,
 	CRectangle,
 	CScore,
-	CTransform
+	CTransform,
+	CTargeting
 >;
 
 class Entity

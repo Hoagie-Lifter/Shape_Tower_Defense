@@ -87,6 +87,20 @@ public:
 		: score(s) {}
 };
 
+class CTargeting : public Component
+{
+public:
+	sf::CircleShape range;
+	
+	CTargeting() = default;
+	CTargeting(float radius, size_t points, const sf::Color & fill)
+		: range(radius, points)
+	{
+		range.setFillColor(fill);
+		range.setOrigin({radius, radius}); // sets origin to center of shape
+	}
+};
+
 class CTransform : public Component
 {
 public:
